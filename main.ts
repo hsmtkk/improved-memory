@@ -56,6 +56,13 @@ class MyStack extends TerraformStack {
       forceDestroy: true,
     });
 
+    new aws.s3BucketOwnershipControls.S3BucketOwnershipControls(this, "public-bucket-owner-control", {
+      bucket: publicBucket.id,
+      rule: {
+        objectOwnership: "BucketOwnerPreferred",
+      },
+    });
+
     new aws.s3BucketAcl.S3BucketAcl(this, "public-bucket-acl", {
       bucket: publicBucket.id,
       acl: "public-read",
