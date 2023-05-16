@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { App, S3Backend, TerraformOutput, TerraformStack } from "cdktf";
+import { App, S3Backend, TerraformStack } from "cdktf";
 import * as aws from "@cdktf/provider-aws";
 
 const REGION = "ap-northeast-1";
@@ -87,28 +87,23 @@ class MyStack extends TerraformStack {
       }],
     });
 
-    const albLogPolicyDocument = {
-      "statement": {
-        "effect": "Allow",
-        "actions": ["s3:PutObject"],
-        "resources": [`arn:aws:s3:::${albLogBucket.id}/*`],
-        "principals": {
-          "type": "AWS",
-          "identifiers": [`${awsAccountID}`],
-        },
-      },
-    }
-
-    const albLogPolicyDocumentJSON = JSON.stringify(albLogPolicyDocument);
+    const albLogPolicyDocument = new aws.dataAwsIamPolicyDocument.DataAwsIamPolicyDocument(this, "alb-log-policy-document", {
+      statement: [{
+        effect: "Allow",
+        actions: ["s3:PutObject"],
+        resources: [`arn:aws:s3:::${albLogBucket.id}/*`],
+        principals: [{
+          type: "AWS",
+          identifiers: [`${awsAccountID}`],
+        }],
+      }],
+    });
 
     new aws.s3BucketPolicy.S3BucketPolicy(this, "alb-log-bucket-policy", {
       bucket: albLogBucket.id,
-      policy: JSON.stringify(albLogPolicyDocumentJSON),
+      policy: albLogPolicyDocument.json,
     });
 
-    new TerraformOutput(this, "alb-log-policy-document", {
-      value: albLogPolicyDocumentJSON,
-    });
   }
 }
 
