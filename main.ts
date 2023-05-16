@@ -17,6 +17,11 @@ class MyStack extends TerraformStack {
     });
 
     new aws.provider.AwsProvider(this, "aws", {
+      defaultTags: [{
+        tags: {
+          "project": "improved-memory",
+        },
+      }],
       region: REGION,
     });
 
